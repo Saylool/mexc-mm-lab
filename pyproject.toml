@@ -5,7 +5,7 @@ description = "Record MEXC spot order books and trades to study market making"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
-dependencies = ["websockets>=15", "pyarrow>=17"]
+dependencies = ["websockets>=15", "pyarrow>=17", "numpy>=2"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
