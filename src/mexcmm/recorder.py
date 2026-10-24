@@ -228,7 +228,11 @@ class Recorder:
             except asyncio.TimeoutError:
                 pass
             # Detach buffers on the event loop, write them in a thread.
-            await asyncio.to_thread(self.sink.write, self.sink.take())
+            try:
+                await asyncio.to_thread(self.sink.write, self.sink.take())
+            except Exception as e:  # never let one bad write stop recording
+                log.exception("write failed: %s", e)
+                self.event("write_error", "", str(e)[:200])
             dt = time.monotonic() - t_last
             rates = {k: (v - last.get(k, 0)) / dt for k, v in self.stats.msgs.items()}
             last, t_last = dict(self.stats.msgs), time.monotonic()
@@ -283,7 +287,9 @@ def main() -> None:
     report_leftovers(args.data)
     symbols = load_universe(args.data, args.universe, args.refresh_universe)
     log.info("recording %d symbols: %s", len(symbols), " ".join(s["symbol"] for s in symbols))
-    run_id = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+    # The venue prefix keeps file names apart when several recorders start in
+    # the same second (they share the events stream directory).
+    run_id = "mexc" + time.strftime("%Y%m%d%H%M%S", time.gmtime())
     rec = Recorder(args.data, symbols, args.snapshot_every, run_id, args.proxy)
 
     async def go() -> None:

@@ -130,7 +130,11 @@ class HLRecorder:
                 await asyncio.wait_for(self.stop.wait(), timeout=every)
             except asyncio.TimeoutError:
                 pass
-            await asyncio.to_thread(self.sink.write, self.sink.take())
+            try:
+                await asyncio.to_thread(self.sink.write, self.sink.take())
+            except Exception as e:  # never let one bad write stop recording
+                log.exception("write failed: %s", e)
+                self.event("write_error", "", str(e)[:200])
             dt = time.monotonic() - t_last
             rates = {k: (v - last[k]) / dt for k, v in self.msgs.items()}
             last, t_last = dict(self.msgs), time.monotonic()
@@ -178,7 +182,8 @@ def main() -> None:
         coins = select_coins(args.data, args.extra.split(","))
         coins_file.write_text(json.dumps({"selected_ms": now_ms(), "coins": coins}, indent=1))
     log.info("recording %d Hyperliquid coins: %s", len(coins), " ".join(coins))
-    rec = HLRecorder(args.data, coins, time.strftime("%Y%m%d%H%M%S", time.gmtime()), args.proxy)
+    rec = HLRecorder(args.data, coins, "hl" + time.strftime("%Y%m%d%H%M%S", time.gmtime()),
+                     args.proxy)
 
     async def go() -> None:
         loop = asyncio.get_running_loop()
