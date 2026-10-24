@@ -28,6 +28,14 @@ Stablecoins and tokenized stocks are excluded. The choice is written to
 | `mexc_snapshots` | REST `/api/v3/depth?limit=1000` | full book at start, after gaps and every 10 min |
 | `binance_bbo` | Binance `<symbol>@bookTicker` | Binance best bid/ask for the "ref" pairs |
 | `events` | recorder | connects, disconnects, version gaps, errors |
+| `hl_book` | Hyperliquid `l2Book` | full top-20 perp book on every change, 10 coins shared with the MEXC set + HYPE |
+| `hl_trades` | Hyperliquid `trades` | every perp trade with buyer and seller wallet addresses |
+
+Hyperliquid is recorded alongside MEXC (`src/mexcmm/hl_recorder.py`,
+`scripts/run_hl.sh`) so that bot density and maker markouts can be compared
+between a centralized spot book and an on-chain perp book for the same
+coins. Hyperliquid publishes both wallet addresses of every trade, so the
+results of real market makers there can be measured directly.
 
 MEXC pushes protobuf; `src/mexcmm/pb.py` decodes the few fields needed,
 using the field numbers from
@@ -58,7 +66,8 @@ how many later snapshots agree with the rebuilt book. A two-minute trial on
 /opt/homebrew/bin/python3.12 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m pytest
-scripts/run.sh          # recorder, restarts itself, keeps the Mac awake
+scripts/run.sh          # MEXC recorder, restarts itself, keeps the Mac awake
+scripts/run_hl.sh       # Hyperliquid recorder
 scripts/upload.sh       # optional: hourly files to Google Drive
 ```
 

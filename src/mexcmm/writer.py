@@ -40,6 +40,18 @@ SCHEMAS: dict[str, pa.Schema] = {
         ("bid", pa.float64()), ("bid_qty", pa.float64()),
         ("ask", pa.float64()), ("ask_qty", pa.float64()),
     ]),
+    # Hyperliquid pushes the full top-20 book on every change (no diffs).
+    "hl_book": pa.schema([
+        ("recv_ms", pa.int64()), ("time_ms", pa.int64()), ("coin", pa.string()),
+        ("side", pa.int8()), ("level", pa.int8()),
+        ("price", pa.float64()), ("qty", pa.float64()), ("orders", pa.int32()),
+    ]),
+    "hl_trades": pa.schema([
+        ("recv_ms", pa.int64()), ("time_ms", pa.int64()), ("coin", pa.string()),
+        ("price", pa.float64()), ("qty", pa.float64()),
+        ("side", pa.int8()),  # 1 taker bought, 2 taker sold (MEXC convention)
+        ("tid", pa.int64()), ("buyer", pa.string()), ("seller", pa.string()),
+    ]),
     "events": pa.schema([
         ("recv_ms", pa.int64()), ("kind", pa.string()), ("symbol", pa.string()),
         ("detail", pa.string()),
