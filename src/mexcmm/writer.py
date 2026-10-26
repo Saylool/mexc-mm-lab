@@ -59,6 +59,12 @@ SCHEMAS: dict[str, pa.Schema] = {
 }
 
 
+def rss_mb() -> int:
+    """Peak resident memory of this process (macOS reports bytes)."""
+    import resource
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss // (1024 * 1024)
+
+
 def now_ms() -> int:
     return time.time_ns() // 1_000_000
 

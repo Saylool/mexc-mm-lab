@@ -66,9 +66,9 @@ how many later snapshots agree with the rebuilt book. A two-minute trial on
 /opt/homebrew/bin/python3.12 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/python -m pytest
-scripts/run.sh          # MEXC recorder, restarts itself, keeps the Mac awake
-scripts/run_hl.sh       # Hyperliquid recorder
-scripts/upload.sh       # optional: hourly files to Google Drive
+scripts/start_all.sh    # both recorders + Drive uploader, detached (survive closing the terminal)
+scripts/status.sh       # last log line of each, running processes, disk
+scripts/stop_all.sh     # clean stop
 ```
 
 ## Google Drive

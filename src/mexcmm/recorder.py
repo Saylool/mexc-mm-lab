@@ -25,7 +25,7 @@ import websockets
 
 from . import universe as uni
 from .pb import DecodeError, decode_push
-from .writer import Sink, now_ms
+from .writer import Sink, now_ms, rss_mb
 
 log = logging.getLogger("recorder")
 
@@ -236,9 +236,9 @@ class Recorder:
             dt = time.monotonic() - t_last
             rates = {k: (v - last.get(k, 0)) / dt for k, v in self.stats.msgs.items()}
             last, t_last = dict(self.stats.msgs), time.monotonic()
-            log.info("msgs/s %s | gaps %d snapshots %d reconnects %d",
+            log.info("msgs/s %s | gaps %d snapshots %d reconnects %d | rss %d MB",
                      " ".join(f"{k}={v:.1f}" for k, v in sorted(rates.items())),
-                     self.stats.gaps, self.stats.snapshots, self.stats.reconnects)
+                     self.stats.gaps, self.stats.snapshots, self.stats.reconnects, rss_mb())
 
     async def run(self) -> None:
         self.event("start", ",".join(self.symbols))

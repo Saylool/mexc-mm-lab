@@ -26,7 +26,7 @@ from pathlib import Path
 
 import websockets
 
-from .writer import Sink, now_ms
+from .writer import Sink, now_ms, rss_mb
 
 log = logging.getLogger("hl")
 
@@ -138,8 +138,8 @@ class HLRecorder:
             dt = time.monotonic() - t_last
             rates = {k: (v - last[k]) / dt for k, v in self.msgs.items()}
             last, t_last = dict(self.msgs), time.monotonic()
-            log.info("msgs/s book=%.1f trades=%.1f | reconnects %d",
-                     rates["book"], rates["trades"], self.reconnects)
+            log.info("msgs/s book=%.1f trades=%.1f | reconnects %d | rss %d MB",
+                     rates["book"], rates["trades"], self.reconnects, rss_mb())
 
     async def run(self) -> None:
         self.event("hl_start", ",".join(self.coins))
